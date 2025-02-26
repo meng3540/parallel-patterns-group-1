@@ -7,4 +7,4 @@ In computing, patterns are a way templates of the best practices used in softwar
 
 Parallel patterns are significant because they offer proven techniques for solving parallel programming tasks and making them more manageable. They're used for a variety of applications such as image processing, data analytics, and AI training, where parallelizing the task speeds up processing.
 
-Heterogeneous GPU-CPU computing is useful in solving parallel patterns because it leverages the strengths of both systems to ensure better resource utilization and more efficient processing. It does this by assigning more heavy computationa tasks to the GPU ad it enables
+Heterogeneous GPU-CPU computing is useful in solving parallel patterns because it leverages the strengths of both systems. It does this by assigning computationally heavy tasks to the GPU, as it can process multiple threads simultaneously, while delegating sequential operations to the CPU to ensure better resource utilization and more efficient processing.

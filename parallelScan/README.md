@@ -29,4 +29,4 @@ __global__ void Kogge_Stone_scan_kernel(float *X, float *Y, unsigned int N) {
         Y[i] = XY[threadIdx.x];
     }
 }
-```c=
+```

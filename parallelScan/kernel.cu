@@ -81,14 +81,25 @@ cudaError_t launch_Kogge_Stone_scan_kernel(float* x, float* y, unsigned int arra
         goto Error;
     }
 
+    // CUDA events for timing
+    cudaEvent_t start, stop;
+    cudaEventCreate(&start);
+    cudaEventCreate(&stop);
+
     cudaStatus = cudaMemcpy(dev_x, x, arraySize * sizeof(float), cudaMemcpyHostToDevice);
     if (cudaStatus != cudaSuccess) {
         fprintf(stderr, "cudaMemcpy failed!");
         goto Error;
     }
 
+    // Record the start event
+    cudaEventRecord(start);
+
+ 
     // Launch CUDA kernel
+    cudaDeviceSynchronize();
     Kogge_Stone_scan_kernel << <(arraySize + SECTION_SIZE - 1) / SECTION_SIZE, SECTION_SIZE >> > (dev_x, dev_y, arraySize);
+    cudaEventRecord(stop);
 
     cudaStatus = cudaGetLastError();
     if (cudaStatus != cudaSuccess) {
@@ -107,6 +118,22 @@ cudaError_t launch_Kogge_Stone_scan_kernel(float* x, float* y, unsigned int arra
         fprintf(stderr, "cudaMemcpy failed!");
         goto Error;
     }
+
+    cudaEventSynchronize(stop);
+    float milliseconds = 0;
+    cudaEventElapsedTime(&milliseconds, start, stop);
+
+    //Print the kernel execution time
+    printf("Kernel execution time: %.3f ms.\n", milliseconds);
+
+    // Calculate the total amount of data transferred (in bytes)
+    long totalDataTransferred = (arraySize * sizeof(float) * 2);
+
+    // Calculate effective bandwidth in GB/s
+    float effectiveBandwidth = (totalDataTransferred / (milliseconds / 1000.0f)) / 1e9;
+
+    // Print effective bandwidth
+    printf("Effective bandwidth (GB/s): %.6f GB/s\n", effectiveBandwidth);
 
 Error:
     cudaFree(dev_x);

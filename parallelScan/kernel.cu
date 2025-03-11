@@ -6,10 +6,10 @@
 #define SECTION_SIZE 32
 
 cudaError_t launch_Kogge_Stone_scan_kernel(float* X, float* Y, unsigned int N);
-
+// Kernel declaration
 __global__ void Kogge_Stone_scan_kernel(float* X, float* Y, unsigned int N) {
-    __shared__ float XY[SECTION_SIZE];
-    unsigned int i = blockIdx.x * blockDim.x + threadIdx.x;
+    __shared__ float XY[SECTION_SIZE]; // Shared memory
+    unsigned int i = blockIdx.x * blockDim.x + threadIdx.x; // Global index
 
     if (i < N) {
         XY[threadIdx.x] = X[i];
@@ -35,8 +35,8 @@ __global__ void Kogge_Stone_scan_kernel(float* X, float* Y, unsigned int N) {
 
 int main() {
     const int arraySize = 5;
-    float x[arraySize] = { 1, 2, 3, 4, 5 };
-    float y[arraySize] = { 0 };
+    float x[arraySize] = { 1, 2, 3, 4, 5 }; // Input
+    float y[arraySize] = { 0 }; // Output
 
     // Launch CUDA kernel
     cudaError_t cudaStatus = launch_Kogge_Stone_scan_kernel(x, y, arraySize);
@@ -59,8 +59,8 @@ int main() {
 
 // Helper function to allocate memory and launch the kernel
 cudaError_t launch_Kogge_Stone_scan_kernel(float* x, float* y, unsigned int arraySize) {
-    float* dev_x = 0;
-    float* dev_y = 0;
+    float* dev_x = 0; // Device copy of array x
+    float* dev_y = 0; // Device copy of array y
     cudaError_t cudaStatus;
 
     cudaStatus = cudaSetDevice(0);
@@ -87,6 +87,7 @@ cudaError_t launch_Kogge_Stone_scan_kernel(float* x, float* y, unsigned int arra
     cudaEventCreate(&stop);
 
     cudaStatus = cudaMemcpy(dev_x, x, arraySize * sizeof(float), cudaMemcpyHostToDevice);
+
     if (cudaStatus != cudaSuccess) {
         fprintf(stderr, "cudaMemcpy failed!");
         goto Error;
@@ -94,11 +95,11 @@ cudaError_t launch_Kogge_Stone_scan_kernel(float* x, float* y, unsigned int arra
 
     // Record the start event
     cudaEventRecord(start);
-
  
     // Launch CUDA kernel
     cudaDeviceSynchronize();
     Kogge_Stone_scan_kernel << <(arraySize + SECTION_SIZE - 1) / SECTION_SIZE, SECTION_SIZE >> > (dev_x, dev_y, arraySize);
+
     cudaEventRecord(stop);
 
     cudaStatus = cudaGetLastError();
@@ -123,7 +124,7 @@ cudaError_t launch_Kogge_Stone_scan_kernel(float* x, float* y, unsigned int arra
     float milliseconds = 0;
     cudaEventElapsedTime(&milliseconds, start, stop);
 
-    //Print the kernel execution time
+    // Print the kernel execution time
     printf("Kernel execution time: %.3f ms.\n", milliseconds);
 
     // Calculate the total amount of data transferred (in bytes)

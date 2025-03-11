@@ -4,7 +4,7 @@ The Kogge-Stone algorithm is a parallel implementation of the prefix sum operati
 
 We implemented the algorithm in CUDA and the kernel is defined in the following code snippet:
 
-```c
+```c=
 __global__ void Kogge_Stone_scan_kernel(float *X, float *Y, unsigned int N) {
     __shared__ float XY[SECTION_SIZE]; 
     unsigned int i = blockIdx.x * blockDim.x + threadIdx.x;
@@ -29,4 +29,4 @@ __global__ void Kogge_Stone_scan_kernel(float *X, float *Y, unsigned int N) {
         Y[i] = XY[threadIdx.x];
     }
 }
-```
+```c=

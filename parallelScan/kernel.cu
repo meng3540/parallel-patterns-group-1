@@ -146,10 +146,11 @@ cudaError_t launch_Kogge_Stone_scan_kernel(float* x, float* y, unsigned int arra
     /* Calculate the effective bandwidth in GB/s */
     float effectiveBandwidth = (totalDataTransferred / (milliseconds / 1000.0f)) / 1e9;
 
-    // Print effective bandwidth
+    /* Print the effective bandwidth in GB/s */
     printf("Effective bandwidth (GB/s): %.6f GB/s.\n", effectiveBandwidth);
 
 Error:
+    /* Free allocated device memory */
     cudaFree(dev_x);
     cudaFree(dev_y);
     return cudaStatus;

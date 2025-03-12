@@ -32,7 +32,7 @@ __global__ void Kogge_Stone_scan_kernel(float *X, float *Y, unsigned int N) {
 ```
 The algorithm takes X as an input array, Y as an output array, and N as the number of elements in the input array.
 
-To start, the algorithm assigns a shared variable *XY* so that all the threads can share the data from the input array. Each thread initializes the element of XY correspondning to its relative id (XY[threadIdx.x]) with the value of the element from the input array X that is at the thread's global position (X[i]). That is, each block will compute the partial sum of a SECTION_SIZE subset of the input array.
+To start, the algorithm assigns a shared variable ```XY``` which is an array with a length of ```SECTION_SIZE``` so that all the threads **within the block** can share the data from the input array. Additionally, the global thread id is calculated and stored in the variable ```i```. Then, each thread initializes ```XY[threadIdx.x]```---the element at the thread's relative position within the block---with ```X[i]```, which is the element at the threads global position. This has the effect of splitting the input array into chunks of size ```SECTION_SIZE``` for each block to compute a partial sum.
 
 The part of the code that does the computation is:
 ```
@@ -46,6 +46,10 @@ The part of the code that does the computation is:
             XY[threadIdx.x] = temp;
     }
 ```
-Putting the thread management aspects of the loop aside for a moment, the main function of this loop is that in each iteration, the array element at the current threads position (XY[threadIdx.x]) is added with the array element that is "stride" elements before it (XY[threadIdx.x]) and then replaces the current element with the sum, repeating until each thread has computed the sum of itself and all the preceding elements.
+Putting the thread management aspects of the loop aside for a moment, the main function of this loop is that in each iteration, the array element ```XY[threadIdx.x]``` is added with the array element ```XY[threadIdx.x - stride]```---the element ```stride``` steps away. The result then replaces the previous ```XY[threadIdx.x]```, repeating until each thread has computed the sum of itself and all the preceding elements.
 
-Once the computation is done, the result is put into the output array Y at index corresponding to the global id of the thread.
+Once the computation is done, the result is put into the output array Y at the index corresponding to the global id of the thread.
+
+### About Thread Management
+
+It's worth noting that since ```XY``` is in shared memory, each thread is changing the array simultaneously. That's where we come back to the management aspects. The first __syncthreads(); ensures that all the threads have finished writing the initial values into ```XY```, otherwise threads that are ahead may be working with the wrong data. Next, ```if(threadIdx.x >= stride)``` ensures that the program does not try to access memory that is out of bounds or a negative array index, which would throw an error. If that condition is met, the computation is stored in a temporary variable. The reason it must be stored in a temporary variable at first is in case one thread overwrites data that another thread is trying to access, which would cause a race condition.

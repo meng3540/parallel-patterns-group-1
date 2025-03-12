@@ -2,32 +2,38 @@
 #include "device_launch_parameters.h"
 #include <stdio.h>
 
-// Define shared memory section size as a constant
+/* Define shared memory section size */
 #define SECTION_SIZE 32
 
 cudaError_t launch_Kogge_Stone_scan_kernel(float* X, float* Y, unsigned int N);
-// Kernel declaration
-__global__ void Kogge_Stone_scan_kernel(float* X, float* Y, unsigned int N) {
-    __shared__ float XY[SECTION_SIZE]; // Shared memory
-    unsigned int i = blockIdx.x * blockDim.x + threadIdx.x; // Global index
 
+/* CUDA kernel implementing the Kogge-Stone scan algorithm */
+__global__ void Kogge_Stone_scan_kernel(float* X, float* Y, unsigned int N) {
+    /* Shared memory allocation for storing sums */
+    __shared__ float XY[SECTION_SIZE];
+    /* Compute global index for each thread */
+    unsigned int i = blockIdx.x * blockDim.x + threadIdx.x;
+
+    /* Load input data into shared memory */
     if (i < N) {
         XY[threadIdx.x] = X[i];
     }
     else {
-        XY[threadIdx.x] = 0.0f;
+        XY[threadIdx.x] = 0.0f; /* Set out-of-bounds threads to zero */
     }
 
+    /* Perform Kogge-Stone parallel prefix sum */
     for (unsigned int stride = 1; stride < blockDim.x; stride *= 2) {
-        __syncthreads();
+        __syncthreads(); /* Synchronize threads before reading */
         float temp;
         if (threadIdx.x >= stride)
             temp = XY[threadIdx.x] + XY[threadIdx.x - stride];
-        __syncthreads();
+        __syncthreads(); /* Synchronize threads before writing */
         if (threadIdx.x >= stride)
             XY[threadIdx.x] = temp;
     }
 
+    /* Write results back to global memory */
     if (i < N) {
         Y[i] = XY[threadIdx.x];
     }

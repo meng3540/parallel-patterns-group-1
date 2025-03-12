@@ -32,7 +32,7 @@ __global__ void Kogge_Stone_scan_kernel(float *X, float *Y, unsigned int N) {
 ```
 The algorithm takes X as an input array, Y as an output array, and N as the number of elements in the input array.
 
-To start, the algorithm assigns a shared variable ```XY``` which is an array with a length of ```SECTION_SIZE``` so that all the threads **within the block** can share the data from the input array. Additionally, the global thread id is calculated and stored in the variable ```i```. Then, each thread initializes ```XY[threadIdx.x]```---the element at the thread's relative position within the block---with ```X[i]```, which is the element at the threads global position. This has the effect of splitting the input array into chunks of size ```SECTION_SIZE``` for each block to compute a partial sum.
+To start, the algorithm assigns a shared variable ```XY``` which is an array with a length of ```SECTION_SIZE``` so that all the threads **within the block** can share the data from the input array. Additionally, the global thread id is calculated and stored in the variable ```i```. Then, each thread initializes ```XY[threadIdx.x]```&mdash;the element at the thread's relative position within the block&mdash;with ```X[i]```, which is the element at the threads global position. This has the effect of splitting the input array into chunks of size ```SECTION_SIZE``` for each block to compute a partial sum.
 
 The part of the code that does the computation is:
 ```
@@ -46,7 +46,7 @@ The part of the code that does the computation is:
             XY[threadIdx.x] = temp;
     }
 ```
-Putting the thread management aspects of the loop aside for a moment, the main function of this loop is that in each iteration, the array element ```XY[threadIdx.x]``` is added with the array element ```XY[threadIdx.x - stride]```---the element ```stride``` steps away. The result then replaces the previous ```XY[threadIdx.x]```, repeating until each thread has computed the sum of itself and all the preceding elements.
+Putting the thread management aspects of the loop aside for a moment, the main function of this loop is that in each iteration, the array element ```XY[threadIdx.x]``` is added with the array element ```XY[threadIdx.x - stride]```&mdash;the element ```stride``` steps away. The result then replaces the previous ```XY[threadIdx.x]```, repeating until each thread has computed the sum of itself and all the preceding elements.
 
 Once the computation is done, the result is put into the output array Y at the index corresponding to the global id of the thread.
 

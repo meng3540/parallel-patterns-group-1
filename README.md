@@ -48,7 +48,7 @@ One effective method to optimize the provided Kogge-Stone scan algorithm is redu
 
 In the basic code, each thread reads from the global memory into shared memory (XY[threadIdx.x] = X[i];), performs the scan, and writes back the result (Y[i] = XY[threadIdx.x];). While shared memory is used for intermediate results in the scan, the final result is written back to global memory one thread at a time.
 
-# Coalesced Memory Writes and Improved Global Memory Access Patterns
+**Coalesced Memory Writes and Improved Global Memory Access Patterns**
 Currently, the write pattern to global memory (Y[i] = XY[threadIdx.x]) is done by each thread individually, which could be inefficient if threads in the same warp are accessing non-adjacent memory locations. This can lead to uncoalesced memory accesses, slowing down the overall performance.
 
 We can optimize the memory access pattern by writing the results back to global memory in a coalesced manner, ensuring that threads in a warp access consecutive memory locations. This is especially important for memory-bound operations like prefix sums. The optimized idea is to increase coalescing by having multiple threads write to a single memory location at once in some cases.

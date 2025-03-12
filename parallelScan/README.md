@@ -53,3 +53,8 @@ Once the computation is done, the result is put into the output array Y at the i
 ### About Thread Management
 
 It's worth noting that since ```XY``` is in shared memory, each thread is changing the array simultaneously. That's where we come back to the management aspects. The first __syncthreads(); ensures that all the threads have finished writing the initial values into ```XY```, otherwise threads that are ahead may be working with the wrong data. Next, ```if(threadIdx.x >= stride)``` ensures that the program does not try to access memory that is out of bounds or a negative array index, which would throw an error. If that condition is met, the computation is stored in a temporary variable. The reason it must be stored in a temporary variable at first is in case one thread overwrites data that another thread is trying to access, which would cause a race condition.
+
+### Results
+With an input array of ```[1, 2, 3, 4, 5]``` we obtain the following output:
+![image](https://github.com/user-attachments/assets/8107ee44-7c79-4bce-82ab-358e5ed05097)
+

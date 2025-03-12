@@ -2,7 +2,7 @@
 #include "device_launch_parameters.h"
 #include <stdio.h>
 
-/* Define shared memory section size */
+/* Define size of chunks that input array will be split into*/
 #define SECTION_SIZE 32
 
 cudaError_t launch_Kogge_Stone_scan_kernel(float* X, float* Y, unsigned int N);
@@ -16,7 +16,7 @@ __global__ void Kogge_Stone_scan_kernel(float* X, float* Y, unsigned int N) {
 
     /* Load input data into shared memory */
     if (i < N) {
-        XY[threadIdx.x] = X[i];
+		XY[threadIdx.x] = X[i]; /* Assign input data to shared memory */
     }
     else {
         XY[threadIdx.x] = 0.0f; /* Set out-of-bounds threads to zero */
@@ -27,10 +27,12 @@ __global__ void Kogge_Stone_scan_kernel(float* X, float* Y, unsigned int N) {
         __syncthreads(); /* Synchronize threads before reading */
         float temp;
         if (threadIdx.x >= stride)
-            temp = XY[threadIdx.x] + XY[threadIdx.x - stride];
+            /* Store the sum in a temporary variable to avoid overwriting XY while other threads are using it*/
+            temp = XY[threadIdx.x] + XY[threadIdx.x - stride]; 
         __syncthreads(); /* Synchronize threads before writing */
         if (threadIdx.x >= stride)
-            XY[threadIdx.x] = temp;
+            /* Write the sum back to shared memory */
+			XY[threadIdx.x] = temp; 
     }
 
     /* Write results back to global memory */
@@ -38,11 +40,12 @@ __global__ void Kogge_Stone_scan_kernel(float* X, float* Y, unsigned int N) {
         Y[i] = XY[threadIdx.x];
     }
 }
+/* The code below is derived from the default kernel code given in Visual Studio*/
 
 int main() {
     const int arraySize = 5;
     float x[arraySize] = { 1, 2, 3, 4, 5 }; /* Input array */
-    float y[arraySize] = { 0 }; /* Output array */
+    float y[arraySize]; /* Output array */
 
     cudaError_t cudaStatus = launch_Kogge_Stone_scan_kernel(x, y, arraySize);
     if (cudaStatus != cudaSuccess) {
@@ -119,7 +122,7 @@ cudaError_t launch_Kogge_Stone_scan_kernel(float* x, float* y, unsigned int arra
         fprintf(stderr, "Kernel launch failed: %s\n", cudaGetErrorString(cudaStatus));
         goto Error;
     }
-
+	/* Synchronize the device */
     cudaStatus = cudaDeviceSynchronize();
     if (cudaStatus != cudaSuccess) {
         fprintf(stderr, "cudaDeviceSynchronize returned error code %d!\n", cudaStatus);
@@ -132,8 +135,8 @@ cudaError_t launch_Kogge_Stone_scan_kernel(float* x, float* y, unsigned int arra
         fprintf(stderr, "cudaMemcpy failed!");
         goto Error;
     }
-
-    cudaEventSynchronize(stop);
+    /* Wait for the stop event to complete */
+	cudaEventSynchronize(stop);
     float milliseconds = 0;
     cudaEventElapsedTime(&milliseconds, start, stop);
 
@@ -150,6 +153,7 @@ cudaError_t launch_Kogge_Stone_scan_kernel(float* x, float* y, unsigned int arra
     printf("Effective bandwidth (GB/s): %.6f GB/s.\n", effectiveBandwidth);
 
 Error:
+
     /* Free allocated device memory */
     cudaFree(dev_x);
     cudaFree(dev_y);

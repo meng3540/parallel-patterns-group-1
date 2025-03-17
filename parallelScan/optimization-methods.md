@@ -9,5 +9,6 @@ It is determined that:
 * The total number of blocks is calculated as `(arraySize + SECTION_SIZE - 1) / SECTION_SIZE`.
 * Each block contains `SECTION_SIZE` threads.
 * Each thread processes one element of the array.
+The limitations of this approach lie in (1) the under-utilization of streaming processors (SMs) and (2) the inefficient handling of large arrays. 
 
 ### Optimizing Memory Access

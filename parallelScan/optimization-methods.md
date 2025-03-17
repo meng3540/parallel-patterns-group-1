@@ -12,8 +12,8 @@ It is determined that:
 
 The main limitations of this approach are:
 
-1. Under-utilization of Streaming Multiprocessors (SMs): Modern GPUs have hundreds or even thousands of cores spread across multiple SMs. If we only launch a limited number of blocks, some SMs may remain idle or underused. For example, with SECTION_SIZE = 32 and arraySize = 1,000,000, we get only 31,250 blocks, which may not fully use all available SMs.
+1. Under-utilization of Streaming Multiprocessors (SMs): Modern GPUs have hundreds or even thousands of cores spread across multiple SMs. If we only launch a limited number of blocks, some SMs may remain idle or underused. For example, with `SECTION_SIZE = 32` and `arraySize = 1,000,000`, we get only 31,250 blocks, which may not fully use all available SMs.
 
-2. Inefficient Handling of Large Arrays: Since each block processes only SECTION_SIZE elements, handling very large datasets requires launching a huge number of blocks. However, because these blocks operate independently, they do not share information beyond their own shared memory. This means an extra computation step is needed to merge the partial results from different blocks.
+2. Inefficient Handling of Large Arrays: Since each block processes only `SECTION_SIZE` elements, handling very large datasets requires launching a huge number of blocks. However, because these blocks operate independently, they do not share information beyond their own shared memory. This means an extra computation step is needed to merge the partial results from different blocks.
 
 ### Optimizing Memory Access

@@ -16,7 +16,7 @@ __global__ void Kogge_Stone_scan_kernel(float* X, float* Y, unsigned int N) {
 
     /* Load input data into shared memory */
     if (i < N) {
-		XY[threadIdx.x] = X[i]; /* Assign input data to shared memory */
+	XY[threadIdx.x] = X[i]; /* Assign input data to shared memory */
     }
     else {
         XY[threadIdx.x] = 0.0f; /* Set out-of-bounds threads to zero */
@@ -32,7 +32,7 @@ __global__ void Kogge_Stone_scan_kernel(float* X, float* Y, unsigned int N) {
         __syncthreads(); /* Synchronize threads before writing */
         if (threadIdx.x >= stride)
             /* Write the sum back to shared memory */
-			XY[threadIdx.x] = temp; 
+		XY[threadIdx.x] = temp; 
     }
 
     /* Write results back to global memory */

@@ -5,10 +5,12 @@
 /* Define size of chunks that input array will be split into*/
 #define SECTION_SIZE 32
 cudaError_t launch_Kogge_Stone_scan_kernel(float* x, float* y, unsigned int arraySize);
+
 /* CUDA kernel implementing the Kogge-Stone scan algorithm */
 __global__ void Kogge_Stone_scan_kernel(float* X, float* Y, float* S, unsigned int N) {
     /* Shared memory allocation for storing sums */
     __shared__ float XY[SECTION_SIZE];
+    
     /* Compute global index for each thread */
     unsigned int i = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -43,10 +45,10 @@ __global__ void Kogge_Stone_scan_kernel(float* X, float* Y, float* S, unsigned i
     }
 }
 
+/* CUDA kernel to perform a parallel prefix sum on the partial sums in S */
 __global__ void S_scan_kernel(float* S, unsigned int nBlocks) {
     /* Shared memory allocation for storing sums */
     extern __shared__ float temp_out[];
-    /* Compute global index for each thread */
 
     /* Load input data into shared memory */
     if (threadIdx.x < nBlocks) {
@@ -56,12 +58,12 @@ __global__ void S_scan_kernel(float* S, unsigned int nBlocks) {
         temp_out[threadIdx.x] = 0.0f; /* Set out-of-bounds threads to zero */
     }
 
-    /* Perform Kogge-Stone parallel prefix sum */
+    /* Perform parallel prefix sum */
     for (unsigned int stride = 1; stride < blockDim.x; stride *= 2) {
         __syncthreads(); /* Synchronize threads before reading */
         float temp;
         if (threadIdx.x >= stride)
-            /* Store the sum in a temporary variable to avoid overwriting XY while other threads are using it*/
+            /* Store the sum in a temporary variable to avoid overwriting S while other threads are accessing it*/
             temp = temp_out[threadIdx.x] + temp_out[threadIdx.x - stride];
         __syncthreads(); /* Synchronize threads before writing */
         if (threadIdx.x >= stride)
@@ -74,7 +76,7 @@ __global__ void S_scan_kernel(float* S, unsigned int nBlocks) {
         S[threadIdx.x] = temp_out[threadIdx.x];
     }
 }
-
+/* CUDA kernel to add the sum of each section to the one ahead of it */
 __global__ void addS_kernel(float* Y, float* S, unsigned int N) {
 	/* Compute global index for each thread */
 	unsigned int i = blockIdx.x * blockDim.x + threadIdx.x;
@@ -87,6 +89,7 @@ __global__ void addS_kernel(float* Y, float* S, unsigned int N) {
 /* The code below is derived from the default kernel code given in Visual Studio*/
 
 int main() {
+    /* Declare/initialize input and output arrays */
 	const int arraySize = 64;
 	float x[arraySize];
 	float y[arraySize];
@@ -94,13 +97,15 @@ int main() {
 		x[i] = i + 1;
 	}
 
+	/* Execute helper function which launches all 3 kernels */
     cudaError_t cudaStatus = launch_Kogge_Stone_scan_kernel(x, y, arraySize);
     if (cudaStatus != cudaSuccess) {
         fprintf(stderr, "Kogge_Stone_scan_kernel failed!");
         return 1;
     }
-    printf("Y = ");
+    
     /* Print the computed prefix sum */
+    printf("Y = ");
     for (int i = 0;i<arraySize;i++){
 		printf("%0.2f ", y[i]);
     }
@@ -119,8 +124,9 @@ int main() {
 cudaError_t launch_Kogge_Stone_scan_kernel(float* x, float* y, unsigned int arraySize) {
     float* dev_x; /* Device memory for input array */
     float* dev_y; /* Device memory for output array */
-	float* dev_S;     /* Device memory for storing sums */
+	float* dev_S; /* Device memory for storing sums */
 
+    /* Calculate number of blocks needed for array */
 	int numBlocks = (arraySize + SECTION_SIZE - 1) / SECTION_SIZE;
 
     cudaError_t cudaStatus;
@@ -146,6 +152,7 @@ cudaError_t launch_Kogge_Stone_scan_kernel(float* x, float* y, unsigned int arra
         goto Error;
     }
     
+	/* Allocate device memory for partial sums */
     cudaStatus = cudaMalloc((void**)&dev_S, numBlocks * sizeof(float));
     if (cudaStatus != cudaSuccess) {
         fprintf(stderr, "cudaMalloc failed!");
@@ -185,20 +192,24 @@ cudaError_t launch_Kogge_Stone_scan_kernel(float* x, float* y, unsigned int arra
         goto Error;
     }
 
+	/* Perform a parallel prefix sum on the partial sums in S if multiple blocks were used*/
     if (numBlocks > 1) {
         
+        /* Launch prefix sum for S array with a block size of 1, with one thread for each block, and passing the size of the temp variable */
         S_scan_kernel << <1, numBlocks, numBlocks * sizeof(float) >> > (dev_S, numBlocks);
         cudaStatus = cudaGetLastError();
         if (cudaStatus != cudaSuccess) goto Error;
         cudaStatus = cudaDeviceSynchronize();
         if (cudaStatus != cudaSuccess) goto Error;
 
-       
+		/* Add the sum of each section to the one ahead of it */
         addS_kernel << <numBlocks, SECTION_SIZE >> > (dev_y, dev_S, arraySize);
         cudaStatus = cudaGetLastError();
-        if (cudaStatus != cudaSuccess) goto Error;
+        if (cudaStatus != cudaSuccess) 
+            goto Error;
         cudaStatus = cudaDeviceSynchronize();
-        if (cudaStatus != cudaSuccess) goto Error;
+        if (cudaStatus != cudaSuccess) 
+            goto Error;
 
     }
     /* Copy results from device to host */

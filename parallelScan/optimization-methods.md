@@ -5,6 +5,9 @@ In CUDA programming, parallel is critical for maximizing GPU efficiency, and inc
 ```c=
 Kogge_Stone_scan_kernel<<<(arraySize + SECTION_SIZE - 1) / SECTION_SIZE, SECTION_SIZE>>>(dev_x, dev_y, arraySize);
 ```
-It is determined that
-* The total number of blocks is calculated as `(arraySize + SECTION_SIZE - 1) / SECTION_SIZE`
+It is determined that:
+* The total number of blocks is calculated as `(arraySize + SECTION_SIZE - 1) / SECTION_SIZE`.
+* Each block contains `SECTION_SIZE` threads.
+* Each thread processes one element of the array.
+
 ### Optimizing Memory Access

@@ -16,6 +16,3 @@ The main limitations of this approach are:
 
 2. **Inefficient Handling of Large Arrays**: Since each block processes only `SECTION_SIZE` elements, handling very large datasets requires launching a huge number of blocks. However, because these blocks operate independently, they do not share information beyond their own shared memory. This means an extra computation step is needed to merge the partial results from different blocks.
 
-
-
-### Optimizing Memory Access

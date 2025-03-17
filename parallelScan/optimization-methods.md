@@ -10,7 +10,10 @@ It is determined that:
 * Each block contains `SECTION_SIZE` threads.
 * Each thread processes one element of the array.
 
-The limitations of this approach lie in (1) the under-utilization of streaming processors (SMs) and (2) the inefficient handling of large arrays. A single block processes a maximum of `SECTION_SIZE` elements. If `SECTION_SIZE=32` and `arraySize=1,000,000`, then only 31,250 blocks are launched. Since modern GPUs have hundreds or thousands of CUDA cores across many SMs, a small number of blocks means some SMs remain idle or underloaded. Additionally, it makes handling large datasets (e.g., millions of elements) much more difficult because a large number of blocks are required. However, in this case, each block operates independently without collaborating with others beyond shared memory, which results in an extra computational step to merge partial sums from each block. Therefore, an optimal balance of thread count per block and total number of blocks is needed to ensure full GPU utilization.
+The main limitations of this approach are:
 
+1. Under-utilization of Streaming Multiprocessors (SMs): Modern GPUs have hundreds or even thousands of cores spread across multiple SMs. If we only launch a limited number of blocks, some SMs may remain idle or underused. For example, with SECTION_SIZE = 32 and arraySize = 1,000,000, we get only 31,250 blocks, which may not fully use all available SMs.
+
+2. Inefficient Handling of Large Arrays: Since each block processes only SECTION_SIZE elements, handling very large datasets requires launching a huge number of blocks. However, because these blocks operate independently, they do not share information beyond their own shared memory. This means an extra computation step is needed to merge the partial results from different blocks.
 
 ### Optimizing Memory Access

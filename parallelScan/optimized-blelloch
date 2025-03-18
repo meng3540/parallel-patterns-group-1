@@ -1,0 +1,56 @@
+#include "cuda_runtime.h"
+#include "device_launch_parameters.h"
+#include <stdio.h>
+#define SECTION_SIZE 32
+
+cudaError_t launch_Blelloch_scan_kernel(float* x, float* y, unsigned int arraySize);
+
+/* Work-Efficient Blelloch Scan Kernel */
+__global__ void Blelloch_scan_kernel(float* X, float* Y, float* S, unsigned int N) {
+    extern __shared__ float temp[];
+    int thid = threadIdx.x;
+    int offset = 1;
+    int i = blockIdx.x * blockDim.x + threadIdx.x;
+    
+    if (2 * thid < N)
+        temp[2 * thid] = X[2 * thid];
+    else
+        temp[2 * thid] = 0;
+    
+    if (2 * thid + 1 < N)
+        temp[2 * thid + 1] = X[2 * thid + 1];
+    else
+        temp[2 * thid + 1] = 0;
+    
+    /* Up-sweep (Reduction) */
+    for (int d = blockDim.x; d > 0; d >>= 1) {
+        __syncthreads();
+        if (thid < d) {
+            int ai = offset * (2 * thid + 1) - 1;
+            int bi = offset * (2 * thid + 2) - 1;
+            temp[bi] += temp[ai];
+        }
+        offset *= 2;
+    }
+    
+    /* Set last element to 0 for exclusive scan */
+    if (thid == 0) temp[N - 1] = 0;
+    
+    /* Down-sweep (Propagation) */
+    for (int d = 1; d < N; d *= 2) {
+        offset >>= 1;
+        __syncthreads();
+        if (thid < d) {
+            int ai = offset * (2 * thid + 1) - 1;
+            int bi = offset * (2 * thid + 2) - 1;
+            float t = temp[ai];
+            temp[ai] = temp[bi];
+            temp[bi] += t;
+        }
+    }
+    __syncthreads();
+    
+    /* Write results back to global memory */
+    if (2 * thid < N) Y[2 * thid] = temp[2 * thid];
+    if (2 * thid + 1 < N) Y[2 * thid + 1] = temp[2 * thid + 1];
+}

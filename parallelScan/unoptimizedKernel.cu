@@ -90,7 +90,7 @@ __global__ void addS_kernel(float* Y, float* S, unsigned int N) {
 
 int main() {
     /* Declare/initialize input and output arrays */
-	const int arraySize = 64;
+	const int arraySize = 1000;
 	float x[arraySize];
 	float y[arraySize];
 	for (int i = 0; i < arraySize; i++) {

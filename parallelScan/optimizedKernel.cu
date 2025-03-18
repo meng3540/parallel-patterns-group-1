@@ -6,15 +6,17 @@
 
 cudaError_t launch_Kogge_Stone_scan_kernel(float* X, float* Y, unsigned int N);
 
-// Optimized Kogge-Stone Scan Kernel Using Warp Shuffles
-__global__ void Kogge_Stone_scan_kernel(float* X, float* Y, unsigned int N) {
+// Optimized Kogge-Stone Scan Kernel with Warp Shuffle and Memory Coalescing
+__global__ void Kogge_Stone_scan_kernel(float* X, float* Y, float* S, unsigned int N) {
+    __shared__ float XY[SECTION_SIZE];
+
     unsigned int i = blockIdx.x * blockDim.x + threadIdx.x;
     int lane = threadIdx.x % warpSize;  // Lane index within a warp
 
-    // Load input from global memory
-    float val = (i < N) ? X[i] : 0.0f;
+    // **Coalesced Memory Access: Load Input from Global to Shared Memory**
+    float val = (i < N) ? X[i] : 0.0f;  // Each thread loads a contiguous element
 
-    // Perform warp-level scan using __shfl_up_sync
+    // **Perform Warp-Level Scan Using __shfl_up_sync()**
     for (int stride = 1; stride < warpSize; stride *= 2) {
         float prev = __shfl_up_sync(0xFFFFFFFF, val, stride, warpSize);
         if (lane >= stride) {
@@ -22,16 +24,94 @@ __global__ void Kogge_Stone_scan_kernel(float* X, float* Y, unsigned int N) {
         }
     }
 
-    // Write results back to global memory efficiently
+    // **Store Results in Shared Memory for Inter-Block Computation**
+    XY[threadIdx.x] = val;
+    
+
+    // **Block-Wide Kogge-Stone Scan for Large Arrays**
+    for (unsigned int stride = warpSize; stride < blockDim.x; stride *= 2) {
+        float temp = 0.0f;
+        if (threadIdx.x >= stride) {
+            temp = XY[threadIdx.x] + XY[threadIdx.x - stride];
+        }
+        __syncthreads();
+        XY[threadIdx.x] = temp;
+        __syncthreads();
+    }
+
+    // **Write Final Result to Global Memory**
     if (i < N) {
-        Y[i] = val;
+        Y[i] = XY[threadIdx.x];
+    }
+
+    // **Store Last Element of Each Block in S (for Hierarchical Scan)**
+    if (threadIdx.x == blockDim.x - 1) {
+        S[blockIdx.x] = XY[threadIdx.x];
+    }
+}
+
+// Kernel for Scanning Partial Sums (Hierarchical Scan)
+__global__ void S_scan_kernel(float* S, unsigned int nBlocks) {
+    unsigned int i2 = blockIdx.x * blockDim.x + threadIdx.x;
+    extern __shared__ float temp_out[];
+    int lane2 = threadIdx.x % warpSize;  // Lane index within a warp
+
+    // **Coalesced Memory Access: Load Input from Global to Shared Memory**
+    float val2 = (i2 < nBlocks) ? S[i2] : 0.0f;
+    // Load data into shared memory with coalesced access
+    if (threadIdx.x < nBlocks) {
+        temp_out[threadIdx.x] = S[threadIdx.x];
+    }
+    else {
+        temp_out[threadIdx.x] = 0.0f;
+    }
+
+    for (int stride = 1; stride < warpSize; stride *= 2) {
+        float prev2 = __shfl_up_sync(0xFFFFFFFF, val2, stride, warpSize);
+        if (lane2 >= stride) {
+            val2 += prev2;
+        }
+    }
+
+
+    // Perform parallel scan on the partial sums
+    for (unsigned int stride = warpSize; stride < blockDim.x; stride *= 2) {
+        __syncthreads();
+        float temp = 0;
+        if (threadIdx.x >= stride) {
+            temp = temp_out[threadIdx.x] + temp_out[threadIdx.x - stride];
+        }
+        __syncthreads();
+        if (threadIdx.x >= stride) {
+            temp_out[threadIdx.x] = temp;
+        }
+    }
+    __syncthreads();
+
+    // Store back to global memory
+    if (threadIdx.x < nBlocks) {
+        S[threadIdx.x] = temp_out[threadIdx.x];
+    }
+}
+
+// Kernel for Adding Block-Wide Prefix Sums
+__global__ void addS_kernel(float* Y, float* S, unsigned int N) {
+    unsigned int i = blockIdx.x * blockDim.x + threadIdx.x;
+
+    // **Each block adds the prefix sum of previous blocks**
+    if (blockIdx.x > 0 && i < N) {
+        Y[i] += S[blockIdx.x - 1];
     }
 }
 
 int main() {
-    const int arraySize = 5;
-    float x[arraySize] = { 1, 2, 3, 4, 5 };
+    const int arraySize = 64;
+    float x[arraySize];
     float y[arraySize];
+
+    for (int i = 0; i < arraySize; i++) {
+        x[i] = i + 1;
+    }
 
     cudaError_t cudaStatus = launch_Kogge_Stone_scan_kernel(x, y, arraySize);
     if (cudaStatus != cudaSuccess) {
@@ -39,60 +119,52 @@ int main() {
         return 1;
     }
 
-    printf("{1,2,3,4,5} => {%f, %f, %f, %f, %f}\n", y[0], y[1], y[2], y[3], y[4]);
-    
+    printf("Y = ");
+    for (int i = 0; i < arraySize; i++) {
+        printf("%0.2f ", y[i]);
+    }
+
     cudaDeviceReset();
     return 0;
 }
 
 cudaError_t launch_Kogge_Stone_scan_kernel(float* x, float* y, unsigned int arraySize) {
-    float* dev_x = nullptr;
-    float* dev_y = nullptr;
+    float* dev_x, * dev_y, * dev_S;
+
+    int numBlocks = (arraySize + SECTION_SIZE - 1) / SECTION_SIZE;
     cudaError_t cudaStatus;
 
     cudaStatus = cudaSetDevice(0);
-    if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "cudaSetDevice failed!\n");
-        goto Error;
-    }
+    if (cudaStatus != cudaSuccess) goto Error;
 
     cudaStatus = cudaMalloc((void**)&dev_x, arraySize * sizeof(float));
     cudaStatus = cudaMalloc((void**)&dev_y, arraySize * sizeof(float));
-    if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "cudaMalloc failed!\n");
-        goto Error;
-    }
+    cudaStatus = cudaMalloc((void**)&dev_S, numBlocks * sizeof(float));
+    if (cudaStatus != cudaSuccess) goto Error;
 
-    // **Memory transfer: Copy data from host to device**
     cudaStatus = cudaMemcpy(dev_x, x, arraySize * sizeof(float), cudaMemcpyHostToDevice);
-    if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "cudaMemcpy failed!\n");
-        goto Error;
-    }
+    if (cudaStatus != cudaSuccess) goto Error;
 
     cudaEvent_t start, stop;
     cudaEventCreate(&start);
     cudaEventCreate(&stop);
     cudaEventRecord(start);
 
-    int threadsPerBlock = SECTION_SIZE;
-    int blocksPerGrid = (arraySize + threadsPerBlock - 1) / threadsPerBlock;
-    
-    Kogge_Stone_scan_kernel<<<blocksPerGrid, threadsPerBlock>>>(dev_x, dev_y, arraySize);
-
-    cudaStatus = cudaGetLastError();
-    if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "Kernel launch failed: %s\n", cudaGetErrorString(cudaStatus));
-        goto Error;
-    }
+    // **Launch Kogge-Stone Kernel**
+    Kogge_Stone_scan_kernel << < numBlocks, SECTION_SIZE >> > (dev_x, dev_y, dev_S, arraySize);
     cudaDeviceSynchronize();
 
-    // **Coalesced memory transfer: Copy results back from device to host**
-    cudaStatus = cudaMemcpy(y, dev_y, arraySize * sizeof(float), cudaMemcpyDeviceToHost);
-    if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "cudaMemcpy failed!\n");
-        goto Error;
+    // **Perform Hierarchical Scan if Needed**
+    if (numBlocks > 1) {
+        S_scan_kernel << < 1, numBlocks, numBlocks * sizeof(float) >> > (dev_S, numBlocks);
+        cudaDeviceSynchronize();
+
+        addS_kernel << < numBlocks, SECTION_SIZE >> > (dev_y, dev_S, arraySize);
+        cudaDeviceSynchronize();
     }
+
+    cudaStatus = cudaMemcpy(y, dev_y, arraySize * sizeof(float), cudaMemcpyDeviceToHost);
+    if (cudaStatus != cudaSuccess) goto Error;
 
     cudaEventRecord(stop);
     cudaEventSynchronize(stop);

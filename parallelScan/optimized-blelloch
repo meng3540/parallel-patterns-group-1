@@ -1,42 +1,41 @@
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
 #include <stdio.h>
-#define SECTION_SIZE 32
+
+#define SECTION_SIZE 32 /* Define the size of each block section */
 
 cudaError_t launch_Blelloch_scan_kernel(float* x, float* y, unsigned int arraySize);
 
-/* Work-Efficient Blelloch Scan Kernel */
-__global__ void Blelloch_scan_kernel(float* X, float* Y, float* S, unsigned int N) {
-    extern __shared__ float temp[];
-    int thid = threadIdx.x;
-    int offset = 1;
-    int i = blockIdx.x * blockDim.x + threadIdx.x;
-    
-    if (2 * thid < N)
-        temp[2 * thid] = X[2 * thid];
-    else
-        temp[2 * thid] = 0;
-    
-    if (2 * thid + 1 < N)
-        temp[2 * thid + 1] = X[2 * thid + 1];
-    else
-        temp[2 * thid + 1] = 0;
-    
-    /* Up-sweep (Reduction) */
-    for (int d = blockDim.x; d > 0; d >>= 1) {
+/* CUDA kernel implementing the Blelloch scan algorithm (work-efficient scan) */
+__global__ void Blelloch_scan_kernel(float* X, float* Y, unsigned int N) {
+    extern __shared__ float temp[]; /* Shared memory allocation for scan */
+
+    int thid = threadIdx.x; /* Thread index within the block */
+    int offset = 1; /* Offset for tree traversal */
+    int ai = 2 * thid;
+    int bi = 2 * thid + 1;
+
+    /* Load input into shared memory */
+    if (ai < N) temp[ai] = X[ai];
+    else temp[ai] = 0.0f;
+    if (bi < N) temp[bi] = X[bi];
+    else temp[bi] = 0.0f;
+
+    /* Up-sweep (reduce) phase */
+    for (int d = N >> 1; d > 0; d >>= 1) {
         __syncthreads();
         if (thid < d) {
             int ai = offset * (2 * thid + 1) - 1;
             int bi = offset * (2 * thid + 2) - 1;
-            temp[bi] += temp[ai];
+            temp[bi] += temp[ai]; /* Accumulate sum */
         }
         offset *= 2;
     }
-    
-    /* Set last element to 0 for exclusive scan */
+
+    /* Clear the last element to start the down-sweep phase */
     if (thid == 0) temp[N - 1] = 0;
-    
-    /* Down-sweep (Propagation) */
+
+    /* Down-sweep phase */
     for (int d = 1; d < N; d *= 2) {
         offset >>= 1;
         __syncthreads();
@@ -45,12 +44,81 @@ __global__ void Blelloch_scan_kernel(float* X, float* Y, float* S, unsigned int 
             int bi = offset * (2 * thid + 2) - 1;
             float t = temp[ai];
             temp[ai] = temp[bi];
-            temp[bi] += t;
+            temp[bi] += t; /* Update with prefix sum */
         }
     }
     __syncthreads();
-    
+
     /* Write results back to global memory */
-    if (2 * thid < N) Y[2 * thid] = temp[2 * thid];
-    if (2 * thid + 1 < N) Y[2 * thid + 1] = temp[2 * thid + 1];
+    if (ai < N) Y[ai] = temp[ai];
+    if (bi < N) Y[bi] = temp[bi];
+}
+
+int main() {
+    const int arraySize = 64;
+    float x[arraySize], y[arraySize];
+    for (int i = 0; i < arraySize; i++) {
+        x[i] = i + 1;
+    }
+
+    /* Execute helper function */
+    cudaError_t cudaStatus = launch_Blelloch_scan_kernel(x, y, arraySize);
+    if (cudaStatus != cudaSuccess) {
+        fprintf(stderr, "Blelloch_scan_kernel failed!");
+        return 1;
+    }
+
+    /* Print the computed prefix sum */
+    printf("Y = ");
+    for (int i = 0; i < arraySize; i++) {
+        printf("%0.2f ", y[i]);
+    }
+
+    cudaDeviceReset(); /* Reset CUDA device */
+    return 0;
+}
+
+/* Helper function to allocate memory and launch the kernel */
+cudaError_t launch_Blelloch_scan_kernel(float* x, float* y, unsigned int arraySize) {
+    float* dev_x, * dev_y;
+    int numThreads = arraySize / 2;
+    cudaError_t cudaStatus;
+
+    cudaStatus = cudaSetDevice(0);
+    if (cudaStatus != cudaSuccess) goto Error;
+
+    /* Allocate device memory */
+    cudaStatus = cudaMalloc((void**)&dev_x, arraySize * sizeof(float));
+    if (cudaStatus != cudaSuccess) goto Error;
+    cudaStatus = cudaMalloc((void**)&dev_y, arraySize * sizeof(float));
+    if (cudaStatus != cudaSuccess) goto Error;
+
+    /* Copy input data to device */
+    cudaMemcpy(dev_x, x, arraySize * sizeof(float), cudaMemcpyHostToDevice);
+
+    cudaEvent_t start, stop;
+    cudaEventCreate(&start);
+    cudaEventCreate(&stop);
+    cudaEventRecord(start);
+
+    /* Launch kernel with shared memory */
+    Blelloch_scan_kernel <<<1, numThreads, arraySize * sizeof(float)>>> (dev_x, dev_y, arraySize);
+    cudaDeviceSynchronize();
+
+    cudaMemcpy(y, dev_y, arraySize * sizeof(float), cudaMemcpyDeviceToHost);
+    cudaEventRecord(stop);
+    cudaEventSynchronize(stop);
+
+    float milliseconds = 0;
+    cudaEventElapsedTime(&milliseconds, start, stop);
+    printf("Kernel execution time: %.3f ms.\n", milliseconds);
+
+    long totalDataTransferred = (arraySize * sizeof(float) * 2);
+    float effectiveBandwidth = (totalDataTransferred / (milliseconds / 1000.0f)) / 1e9;
+    printf("Effective bandwidth (GB/s): %.6f GB/s.\n", effectiveBandwidth);
+
+Error:
+    cudaFree(dev_x);
+    cudaFree(dev_y);
+    return cudaStatus;
 }

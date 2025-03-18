@@ -63,7 +63,7 @@ cudaError_t launch_Kogge_Stone_scan_kernel(float* x, float* y, unsigned int arra
         goto Error;
     }
 
-    // **Coalesced memory transfer: Copy data from host to device**
+    // **Memory transfer: Copy data from host to device**
     cudaStatus = cudaMemcpy(dev_x, x, arraySize * sizeof(float), cudaMemcpyHostToDevice);
     if (cudaStatus != cudaSuccess) {
         fprintf(stderr, "cudaMemcpy failed!\n");

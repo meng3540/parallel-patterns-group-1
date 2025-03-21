@@ -13,7 +13,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{3ABA4FF7-FEC7-B570-4DFE-791AE4A2E751}</ProjectGuid>
     <RootNamespace>parallelScan</RootNamespace>
-    <ProjectName>blelloch</ProjectName>
+    <ProjectName>optimized</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">

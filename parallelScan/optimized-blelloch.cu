@@ -38,7 +38,7 @@ __global__ void Blelloch_scan_kernel(float* X, float* Y, unsigned int arraySize,
     if (2 * thid + 1 < arraySize) temp[bi] = X[2 * thid + 1];
     else temp[bi] = 0.0f;
 
-    // **Up-Sweep (Reduce Phase)** - Builds a summation tree
+    // Up-Sweep builds a summation tree
     for (int d = SECTION_SIZE >> 1; d > 0; d >>= 1) {
         __syncthreads();
         if (idx < d) {
@@ -59,7 +59,7 @@ __global__ void Blelloch_scan_kernel(float* X, float* Y, unsigned int arraySize,
     }
     __syncthreads();  // Ensure all threads see the correct previous_sum
 
-    // **Down-Sweep Phase** - Converts the sum tree into an exclusive prefix sum
+    // Down-Sweep Phase converts the sum tree into an exclusive prefix sum
     if (idx == 0) temp[SECTION_SIZE - 1] = 0; // Root of the sum tree is set to 0
     for (int d = 1; d < SECTION_SIZE; d *= 2) {
         offset >>= 1;

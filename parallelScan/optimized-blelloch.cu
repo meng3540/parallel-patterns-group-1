@@ -3,7 +3,7 @@
 #include <stdio.h>
 
 #define SECTION_SIZE 128 /* Define the size of each block section */
-#define N 65536 /* Define the size of the array */
+#define N 32678 /* Define the size of the array */
 
 cudaError_t launch_Blelloch_scan_kernel(float* x, float* y, unsigned int arraySize);
 

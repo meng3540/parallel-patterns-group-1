@@ -21,7 +21,8 @@
 ![image](https://github.com/user-attachments/assets/15259dac-fa00-457f-b31f-87a3d0ccca39)
 ![image](https://github.com/user-attachments/assets/b6f60cc8-d306-4e18-98fa-f574e6f980b5)
 ![image](https://github.com/user-attachments/assets/f291ca81-6d87-423a-b13f-7d9b21ae7e2e)
-
+![image](https://github.com/user-attachments/assets/8af48708-9e58-4ebf-80a5-a07229d30203)
+The Kogge_Stone_scan_kernel is taking up the most time.
 
 ## optimizedBlelloch.cu
 ![image](https://github.com/user-attachments/assets/f02c70d5-ce5d-4f3a-8eb9-8bab57b2e773)

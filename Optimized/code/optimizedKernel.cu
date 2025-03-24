@@ -11,10 +11,10 @@ __global__ void Kogge_Stone_scan_kernel(float* X, float* Y, float* S, unsigned i
     __shared__ float XY[SECTION_SIZE];
 
     unsigned int i = blockIdx.x * blockDim.x + threadIdx.x;
-    int lane = threadIdx.x % warpSize;  // Lane index within a warp
+    int lane = threadIdx.x % warpSize;  /* Lane index within a warp */
 
     /* **Coalesced Memory Access: Load Input from Global to Shared Memory** */
-    float val = (i < N) ? X[i] : 0.0f;  // Each thread loads a contiguous element
+    float val = (i < N) ? X[i] : 0.0f;  /* Each thread loads a contiguous element */
 
     /* **Perform Warp-Level Scan Using __shfl_up_sync()** */
     for (int stride = 1; stride < warpSize; stride *= 2) {

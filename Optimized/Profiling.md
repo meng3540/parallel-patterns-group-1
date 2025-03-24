@@ -1,5 +1,14 @@
 # Profiling
 ## unoptimizedKernel.cu
+![image](https://github.com/user-attachments/assets/511e76ee-0648-4834-8bef-0bb86dd8a456)
+![image](https://github.com/user-attachments/assets/9186db21-29c9-4249-9b58-e114a52e5d43)
+![image](https://github.com/user-attachments/assets/4f589930-22f3-4561-9618-41cbb4b1c9b0)
+![image](https://github.com/user-attachments/assets/28c33fb6-718d-43fd-baae-5f256b71e87a)
+![image](https://github.com/user-attachments/assets/254ed7f4-e257-4cce-a269-5fe2e130699d)
+![image](https://github.com/user-attachments/assets/ea607e05-a257-4ee9-9192-264b7ada2c77)
+![image](https://github.com/user-attachments/assets/0e12f26c-177b-4228-a9c4-6809270fec10)
+![image](https://github.com/user-attachments/assets/ce9105eb-9bae-4a9b-aaea-03bc7940be19)
+![image](https://github.com/user-attachments/assets/42aafdf1-bb5d-4d6b-b534-0f6030f3ad2b)
 
 
 ## optimizedBlelloch.cu

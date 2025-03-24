@@ -36,3 +36,14 @@ The Kogge_Stone_scan_kernel is taking up the most time.
 ![image](https://github.com/user-attachments/assets/023c7be4-69ca-4d93-a2d3-42aaeeca610c)
 ![image](https://github.com/user-attachments/assets/c66781c5-1a00-42b1-8ada-cb2178d23735)
 ![image](https://github.com/user-attachments/assets/56fa7974-2a0c-43b4-a8c9-26b3e6403f5f)
+
+![image](https://github.com/user-attachments/assets/e3138df0-57af-4b23-9a81-c9ba98cf54c8)
+![image](https://github.com/user-attachments/assets/41bbf318-65aa-4d87-aa4e-91f7bb134e3d)
+![image](https://github.com/user-attachments/assets/69b7a1e8-f599-47f5-b530-67c76aaf9c57)
+![image](https://github.com/user-attachments/assets/eaa75fb0-dc47-4e5a-95ec-c2a8480764f4)
+![image](https://github.com/user-attachments/assets/ef242980-8c41-4935-a60f-404c8f3ae183)
+![image](https://github.com/user-attachments/assets/d54f0a3e-74df-4bf7-b7c0-448fb3ed935b)
+![image](https://github.com/user-attachments/assets/0eee5ae5-a3d3-4d56-9621-88a43f77000e)
+![image](https://github.com/user-attachments/assets/db81e610-0001-4399-9c5c-f2d464997f37)
+![image](https://github.com/user-attachments/assets/88fa5aa0-8ce7-4d8f-b2b0-cb7c2fb5298c)
+The CudaMalloc is taking up the most time.

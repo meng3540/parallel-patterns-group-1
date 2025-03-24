@@ -17,6 +17,8 @@
 ![image](https://github.com/user-attachments/assets/6f11d6fa-7ea0-4736-8324-67d6abb7482a)
 ![image](https://github.com/user-attachments/assets/52fe08aa-fb2e-4a02-8099-b8ff06a5fc4b)
 ![image](https://github.com/user-attachments/assets/95270524-a7c1-41bb-b716-c62ee0620c9b)
+![image](https://github.com/user-attachments/assets/a91783d6-a9e6-4af9-87d5-0c61b8d4537c)
+![image](https://github.com/user-attachments/assets/15259dac-fa00-457f-b31f-87a3d0ccca39)
 
 
 ## optimizedBlelloch.cu

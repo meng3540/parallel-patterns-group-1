@@ -12,6 +12,13 @@
 ![image](https://github.com/user-attachments/assets/7ad58495-df26-4599-b952-1c477a804865)
 ![image](https://github.com/user-attachments/assets/857b0e0a-a709-4058-b1df-6802196cb9bd)
 
+![image](https://github.com/user-attachments/assets/ae014853-eb35-44ba-ac0d-82ab1e8fcaa1)
+![image](https://github.com/user-attachments/assets/9ec79efa-0d72-42ef-b180-e596acfc553f)
+![image](https://github.com/user-attachments/assets/6f11d6fa-7ea0-4736-8324-67d6abb7482a)
+![image](https://github.com/user-attachments/assets/52fe08aa-fb2e-4a02-8099-b8ff06a5fc4b)
+![image](https://github.com/user-attachments/assets/95270524-a7c1-41bb-b716-c62ee0620c9b)
+
+
 ## optimizedBlelloch.cu
 ![image](https://github.com/user-attachments/assets/f02c70d5-ce5d-4f3a-8eb9-8bab57b2e773)
 ![image](https://github.com/user-attachments/assets/94614944-efa8-4d63-8f99-69b220d7c839)

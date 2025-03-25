@@ -57,3 +57,6 @@ It's worth noting that since ```XY``` is in shared memory, each thread is changi
 ### Input size limit
 In this novice implementation, the algorithm doesn't give you the final result for an arbitrary size input since each block calculates a partial sum of the overall input. This is limitation is partially controlled by section size, indeed you could increase the section size in order to allow for larger inputs, but that would only work for inputs that have less elements than the maximum threads per block and can fit in the shared memory of a single block. In order to resolve this issue, you can use one extra array ```S```, which would store the result of each block, and two more kernels. The first kernel would find the prefix sum of ```S``` and the second kernel would add each element of ```S``` to each block of ```Y```, effectively adding to each block the sum of the previous blocks.
 
+The result of the code:
+![image](https://github.com/user-attachments/assets/7755d668-13cc-425e-9f29-c49f07469823)
+

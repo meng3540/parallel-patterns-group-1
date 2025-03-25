@@ -49,3 +49,7 @@ The Kogge_Stone_scan_kernel is taking up the most time.
 ![image](https://github.com/user-attachments/assets/db81e610-0001-4399-9c5c-f2d464997f37)
 ![image](https://github.com/user-attachments/assets/88fa5aa0-8ce7-4d8f-b2b0-cb7c2fb5298c)
 The CudaMalloc is taking up the most time.
+
+##optimizedWarpLevelScan.cu
+
+![image](https://github.com/user-attachments/assets/3dcc246f-caa1-4ce6-8026-c6117b2cdee0)

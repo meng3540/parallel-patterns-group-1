@@ -9,4 +9,8 @@ With an array of 64 elements from 1 to 64:
 ![result of unoptimized](https://github.com/user-attachments/assets/5a2e53b8-e3b8-4434-9627-afd1eb11b483)
 
 $\frac{64(64+1)}{2} = 2080 $
+
+
+
+
 ![image](https://github.com/user-attachments/assets/e8a179c0-7d85-4264-8352-a8d2f421d3e9)

@@ -43,6 +43,9 @@ The parallel prefix sum algorithm typically operates in two main phases:
 
 In summary, the Parallel Scan/Prefix Sum pattern is an essential, highly efficient technique in parallel computing. It transforms sequential accumulation into a concurrent process, enabling significant performance improvements for a wide range of applications, from simple data processing to complex algorithmic tasks.
 
+The result of the unoptimized code:
+
+
 # Optimizations & Performance Results
 
 | Optimization # | Description | Execution time | Memory Bandwidth (GB/s) | Step speedup | Cumulative Speedup |

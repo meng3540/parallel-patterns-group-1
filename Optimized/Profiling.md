@@ -1,4 +1,6 @@
 # Profiling
+**All algorithms were profiled with an input array size of 32768 since that was the limit of the unoptimized kernel.**
+
 ## unoptimizedKernel.cu
 ![image](https://github.com/user-attachments/assets/511e76ee-0648-4834-8bef-0bb86dd8a456)
 ![image](https://github.com/user-attachments/assets/9186db21-29c9-4249-9b58-e114a52e5d43)

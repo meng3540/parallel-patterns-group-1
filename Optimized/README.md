@@ -25,5 +25,3 @@ The algorithm includes two phases:
 3. **Down-Sweep**: We then move back down the tree and distribute partial sums to compute the final prefix sum. We start by inserting a zero at the root of the tree, and on each step, each node at the current level passes its own value to its left child and the sum of its value and the former value of its left child to its right child. This allows each element to get its correct prefix sum in parallel.
 ![image](https://github.com/user-attachments/assets/883892ca-8bdc-4b21-b70a-28761194b679)
 
-The result of the code:
-![image](https://github.com/user-attachments/assets/d8b904d9-b804-4156-84a0-56d09e775336)

@@ -9,7 +9,7 @@ Parallel patterns are significant because they offer proven techniques for solvi
 
 Heterogeneous GPU-CPU computing is useful in solving parallel patterns because it leverages the strengths of both systems. It does this by assigning computationally heavy tasks to the GPU, as it can process multiple threads simultaneously, while delegating sequential operations to the CPU to ensure better resource utilization and more efficient processing.
 
-## Parallel Scan / Prefix Sum Pattern
+# Parallel Scan / Prefix Sum Pattern
 
 **Overview & Applications:**  
 The Parallel Scan, also known as the Prefix Sum pattern, is a fundamental building block in parallel computing. It takes an input array and produces an output array where each element is the cumulative result (often a sum) of all preceding elements in the array. This pattern isn’t just limited to addition—it can be applied to any associative operation (like multiplication, maximum, or even custom operations). Its versatility makes it useful in a variety of applications, including:
@@ -42,3 +42,10 @@ The parallel prefix sum algorithm typically operates in two main phases:
   Modern GPUs and multi-core CPUs are specifically designed to handle many small, simultaneous operations. Implementing the prefix sum algorithm on such hardware not only leverages their parallel processing capabilities but also lays the groundwork for more complex parallel algorithms that rely on efficient data aggregation.
 
 In summary, the Parallel Scan/Prefix Sum pattern is an essential, highly efficient technique in parallel computing. It transforms sequential accumulation into a concurrent process, enabling significant performance improvements for a wide range of applications, from simple data processing to complex algorithmic tasks.
+
+# Optimizations & Performance Results
+
+| Optimization # | Description | Execution time | Memory Bandwidth (GB/s) | Step speedup | Cumulative Speedup |
+|---|---|---|---|---|---|
+| 1 |Blelloch Scan: | | | | | 
+| 2 | | | | | | 

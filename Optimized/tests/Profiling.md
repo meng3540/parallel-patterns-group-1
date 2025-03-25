@@ -24,6 +24,7 @@
 ![image](https://github.com/user-attachments/assets/b6f60cc8-d306-4e18-98fa-f574e6f980b5)
 ![image](https://github.com/user-attachments/assets/f291ca81-6d87-423a-b13f-7d9b21ae7e2e)
 ![image](https://github.com/user-attachments/assets/8af48708-9e58-4ebf-80a5-a07229d30203)
+
 The Kogge_Stone_scan_kernel is taking up the most time.
 
 ## optimizedBlelloch.cu
@@ -48,6 +49,7 @@ The Kogge_Stone_scan_kernel is taking up the most time.
 ![image](https://github.com/user-attachments/assets/0eee5ae5-a3d3-4d56-9621-88a43f77000e)
 ![image](https://github.com/user-attachments/assets/db81e610-0001-4399-9c5c-f2d464997f37)
 ![image](https://github.com/user-attachments/assets/88fa5aa0-8ce7-4d8f-b2b0-cb7c2fb5298c)
+
 The CudaMalloc is taking up the most time.
 
 ## optimizedWarpLevelScan.cu
@@ -63,3 +65,14 @@ The CudaMalloc is taking up the most time.
 ![image](https://github.com/user-attachments/assets/9f3764d6-be68-4f8b-aacb-984f40782991)
 ![image](https://github.com/user-attachments/assets/29b1bf0d-ee96-498f-a687-613771010a41)
 ![image](https://github.com/user-attachments/assets/505fda98-34b6-4dbd-a6c3-a8622c146802)
+
+![image](https://github.com/user-attachments/assets/d47d8ded-7077-4944-9960-abb28a13b581)
+![image](https://github.com/user-attachments/assets/ea65f58b-a8b9-47ca-8f78-82fe4c210ece)
+![image](https://github.com/user-attachments/assets/9b4edd0a-4ecc-409f-8ee8-13a43e3d430c)
+![image](https://github.com/user-attachments/assets/d9ff174e-373c-4ffa-b35a-d6d99c39a5e0)
+![image](https://github.com/user-attachments/assets/af428739-6d7c-4653-bc67-d6ee8a398de3)
+![image](https://github.com/user-attachments/assets/5b93e8d4-0647-4cbd-9b06-1803ffbc079d)
+![image](https://github.com/user-attachments/assets/e109e7f2-f237-47e2-8340-33285a41ff7b)
+![image](https://github.com/user-attachments/assets/370559b9-29bc-47e9-868d-5497a1b7ff93)
+
+The Kogge_Stone_scan_kernel is taking the most time.

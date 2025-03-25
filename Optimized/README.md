@@ -26,3 +26,4 @@ The algorithm includes two phases:
 ![image](https://github.com/user-attachments/assets/883892ca-8bdc-4b21-b70a-28761194b679)
 
 The result of the code:
+![image](https://github.com/user-attachments/assets/d8b904d9-b804-4156-84a0-56d09e775336)

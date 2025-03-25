@@ -48,4 +48,4 @@ In summary, the Parallel Scan/Prefix Sum pattern is an essential, highly efficie
 | Optimization # | Description | Execution time | Memory Bandwidth (GB/s) | Step speedup | Cumulative Speedup |
 |---|---|---|---|---|---|
 | 1 |Blelloch Scan: | | | | | 
-| 2 | | | | | | 
+| 2 |Warp Level Scan: | | | | | 

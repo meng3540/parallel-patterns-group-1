@@ -46,13 +46,13 @@ The part of the code that does the computation is:
             XY[threadIdx.x] = temp;
     }
 ```
-Putting the thread management aspects of the loop aside for a moment, the main function of this loop is that in each iteration, the array element ```XY[threadIdx.x]``` is added with the array element ```XY[threadIdx.x - stride]```&mdash;the element ```stride``` steps away. The result then replaces the previous ```XY[threadIdx.x]```, repeating until each thread has computed the sum of itself and all the preceding elements.
+Putting the synchronization aspects of the loop aside for a moment, the main function of this loop is that in each iteration, the array element ```XY[threadIdx.x]``` is added with the array element ```XY[threadIdx.x - stride]```&mdash;the element ```stride``` steps away. The result then replaces the previous ```XY[threadIdx.x]```, repeating until each thread has computed the sum of itself and all the preceding elements.
 
 Once the computation is done, the result is put into the output array Y at the index corresponding to the global id of the thread.
 
-### Thread Management
+### Thread Synchronization
 
-It's worth noting that since ```XY``` is in shared memory, each thread is changing the array simultaneously. That's where we come back to the management aspects. The first ```__syncthreads();``` ensures that all the threads have finished writing the initial values into ```XY```, otherwise threads that are ahead may be working with the wrong data. Next, ```if(threadIdx.x >= stride)``` ensures that the program does not try to access memory that is out of bounds or a negative array index, which would throw an error. If that condition is met, the computation is stored in a temporary variable. The reason it must be stored in a temporary variable at first is to avoid modifying ```XY``` before all threads have finished their calculation. Othwerwise a race condition could occur in which one thread overwrites data that another thread is trying to read.
+It's worth noting that since ```XY``` is in shared memory, each thread is changing the array simultaneously. That's where we come back to the synchronization aspect. The first ```__syncthreads();``` ensures that all the threads have finished writing the initial values into ```XY```, otherwise threads that are ahead may be working with the wrong data. Next, ```if(threadIdx.x >= stride)``` ensures that the program does not try to access memory that is out of bounds or a negative array index, which would throw an error. If that condition is met, the computation is stored in a temporary variable. The reason it must be stored in a temporary variable at first is to avoid modifying ```XY``` before all threads have finished their calculation. Othwerwise a race condition could occur in which one thread overwrites data that another thread is trying to read.
 
 ### Results
 With an input array of ```[1, 2, 3, 4, 5]``` we obtain the following output:

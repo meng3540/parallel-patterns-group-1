@@ -10,7 +10,7 @@ With an array of 64 elements from 1 to 64:
 
 $\frac{64(64+1)}{2} = 2080 $
 
-
-
+The result of the code:
+![image](https://github.com/user-attachments/assets/7755d668-13cc-425e-9f29-c49f07469823)
 
 ![image](https://github.com/user-attachments/assets/e8a179c0-7d85-4264-8352-a8d2f421d3e9)

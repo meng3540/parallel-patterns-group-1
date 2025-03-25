@@ -1,10 +1,10 @@
 # Unoptimized Kogge-Stone Algorithm in CUDA
 
-The Kogge-Stone algorithm is a parallel implementation of the prefix sum operation which takes advantage of reduction trees to take the computational complexity from O(n) in the sequential case to O(n*log(n)).
+The Kogge-Stone algorithm is a parallel implementation of the prefix sum operation which takes advantage of reduction trees to improve execution time with the trade-off of taking the computational complexity from O(n) in the sequential case to O(n*log(n)).
 
 We implemented the algorithm in CUDA and the basic kernel is defined in the following code snippet:
 
-```c=
+```
 __global__ void Kogge_Stone_scan_kernel(float *X, float *Y, unsigned int N) {
     __shared__ float XY[SECTION_SIZE]; 
     unsigned int i = blockIdx.x * blockDim.x + threadIdx.x;

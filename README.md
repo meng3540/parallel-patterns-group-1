@@ -49,4 +49,4 @@ In summary, the Parallel Scan/Prefix Sum pattern is an essential, highly efficie
 | Optimization # | Description | Execution time | Memory Bandwidth (GB/s) | Step speedup | Cumulative Speedup |
 |---|---|---|---|---|---|
 | 1 | **Blelloch Scan** speeds up parallel prefix sum by doing the work in two phases: first it builds up partial sums (upsweep), then it uses those to compute the final results (downsweep). This avoids conflicts between threads and makes it easy to split the work evenly across the GPU | 872.16 $\mu s$ |15.45 |436.08 |436.08 | 
-| 2 |Warp Level Scan: |2882 $\mu s$ | | | | 
+| 2 |Warp Level Scan: |2882 $\mu s$ |0.08 | | | 

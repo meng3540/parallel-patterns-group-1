@@ -48,5 +48,5 @@ In summary, the Parallel Scan/Prefix Sum pattern is an essential, highly efficie
 
 | Optimization # | Description | Execution time | Memory Bandwidth (GB/s) | Step speedup | Cumulative Speedup |
 |---|---|---|---|---|---|
-| 1 | **Blelloch Scan** speeds up parallel prefix sum by doing the work in two phases: first it builds up partial sums (upsweep), then it uses those to compute the final results (downsweep). This avoids conflicts between threads and makes it easy to split the work evenly across the GPU | 872.16 $\mu s$ |15.45 |436.08 |436.08 | 
+| 1 | **Blelloch Scan** speeds up parallel prefix sum by doing the work in two phases: first it builds up partial sums (upsweep), then it uses those to compute the final results (downsweep). This avoids conflicts between threads and makes it easy to split the work evenly across the GPU | 872.16 $\mu s$ |0.35 |436.08 |436.08 | 
 | 2 |Warp Level Scan: This kernel performs a parallel prefix sum using the Kogge-Stone algorithm. It leverages warp shuffle instructions for fast communication between threads in the same warp, avoiding the need for shared memory and synchronization in those steps. We use shared memory only for block-level collaboration. The result is an efficient, scalable scan implementation that minimizes memory latency and maximizes throughput. |2882 $\mu s$ |0.0909 |7.55 |7.55 | 
